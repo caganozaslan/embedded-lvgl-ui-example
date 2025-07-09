@@ -1,36 +1,35 @@
-# Kullanım Kılavuzu
+# Usage Guide
 
-## Giriş
+## Introduction
 
-Bu belge, LVGL tabanlı gömülü arayüz projesinin nasıl derleneceğini, çalıştırılacağını ve kullanılacağını açıklamaktadır. Sistem hem gerçek Linux cihazlar üzerinde hem de Windows simülatörü ile çalışacak şekilde tasarlanmıştır. Arayüz, modüler bir yapıya sahip olup çeşitli sayfalardan oluşur ve her biri sistemsel işlevleri veya veri görüntüleme görevlerini yerine getirir.
+This document explains how to build, run, and use the LVGL-based embedded UI project. The system is designed to work both on real Linux-based embedded devices and in a Windows simulator. The interface has a modular structure, consisting of multiple screens, each responsible for specific system functions or data display.
 
-## Gereksinimler
+## Requirements
 
-### Linux Tabanlı Gömülü Cihazlar İçin
+### For Linux-Based Embedded Devices
 
-Projenin tüm testleri Yocto tabanlı özel Linux dağıtımı ile yapılmıştır. Proje tüm Linux cihazlarda kullanılabilir yapıdadır ancak tüm gereksinimlere sahip olduğundan emin olmanız gerekir.
+All project testing has been performed using a custom Yocto-based Linux distribution. While the project is compatible with any Linux system, make sure that the required tools and permissions are available.
 
-- Gerekli paketler: iproute2, iw, wpa-supplicant, psmisc, net-tools, coreutils, grep, gawk, nano.
-- LVGL 9.1
-- CMake >= 3.13
-- GCC / G++ (C++17 desteği olan)
-- Linux framebuffer desteği (örneğin: /dev/fb0)
-- Gerekli izinler: /etc dizinine yazma
+- Required packages: `iproute2`, `iw`, `wpa-supplicant`, `psmisc`, `net-tools`, `coreutils`, `grep`, `gawk`, `nano`
+- LVGL version 9.1
+- CMake version ≥ 3.13
+- GCC / G++ with C++17 support
+- Linux framebuffer support (e.g., `/dev/fb0`)
+- Write permissions to the `/etc` directory
 
+### For Windows Simulator
 
-### Windows Simulator İçin
+- Visual Studio IDE (tested with 2022 version)
+  - "Desktop development with C++" workload
+  - Windows 10 SDK or Windows 11 SDK
+- Minimum 8 GB RAM
+- LVGL version 9.1
 
-- Visual Studio IDE (Test edilen 2022 versiyonu)
-  - Desktop development with C++
-  - Windows 10 SDK veya Windows 11 SDK
-- 8 GB RAM
-- LVGL 9.1
+## Building and Running
 
-## Derleme ve Çalıştırma
+### For Linux Environment
 
-### Linux Ortamı İçin
-
-Örnek projeyi indirmek ve derlemek için aşağıdaki adımları uygulayabilirsiniz.
+You can follow the steps below to download and build the sample project.
 
 ```bash
 git clone --recurse-submodules https://github.com/caganozaslan/embedded-lvgl-ui-example/src
@@ -40,27 +39,31 @@ cmake -B build -S .
 make -C build -j
 ```
 
-Derlenen çıktı bin klasörü altında **main** adında bulunacaktır.
+The compiled output will be located under the `bin` directory as an executable named **main**.
 
+### For Windows Environment
 
-### Windows Ortamı İçin
-
-Windows simülatörü kuracağınız klasöre gidin ve ardından: 
+Navigate to the folder where you want to set up the Windows simulator, then:
 
 ```bash
 git clone --recurse-submodules https://github.com/lvgl/lv_port_pc_visual_studio.git
 ```
 
-İlgili repodaki Windows simülatör kurulum adımlarını takip ederek simülatör ortamının hazırlandığından emin olun.
+Follow the Windows simulator setup steps provided in the relevant repository to ensure the simulation environment is properly configured.
 
-**LvglWindowssimulator.cpp** dosyasını açın ve aşağıdaki satırları bulup yorum satırı haline çevirin.
+Open the **LvglWindowssimulator.cpp** file and locate the following lines. Then, comment them out.
 
 ```bash
 lv_demo_widgets();
 lv_demo_benchmark();
 ```
 
-Ardından projedeki gerekli header dosyaları (bu projede screen içeren tüm dosyalar buraya dahildir) en üste `#include live_data.h` formatında ekleyin. Bu aşamadan itibaren yorum satırı yaptığınız demo bölümüne kendi fonksiyonunuzu ekleyebilirsiniz. İlgili dosyanın tam hali aşağıdaki gibidir:
+Next, include all the necessary header files from the project (in this case, all files containing `screen` definitions) at the top of the file using the `#include "live_data.h"` format.
+
+From this point on, you can replace the commented-out demo section with your own function call.
+
+The complete version of the modified file is shown below:
+
 
 ```cpp
 #include <Windows.h>
@@ -175,12 +178,20 @@ int main()
 }
 ```
 
-Bu aşamadan itibaren tüm proje dosyalarını simülatörün bulunduğu klasöre koyun ve Visual Studio IDE üzerinden DEBUG başlatın. Simülasyon ekranı karşınıza gelecektir.
+From this point on, place all project source files into the folder where the simulator is located, and start the project in **DEBUG** mode using Visual Studio IDE. The simulation window should now appear.
 
-## Önemli Uyarılar
+## Important Notes
 
-- Örnek uygulama Framebuffer görüntü altyapısına göre yapılandırılmıştır. Bu nedenle aktif bir masaüstü ortamı çalışmaması gerekir. Eğer masaüstü ortamı çalıştırmak istiyorsanız uygulamanın görüntü altyapısını SDL olarak değiştirmelisiniz.
-- Framebuffer tabanlı uygulamalarda konsol logları ve GUI aynı ekrana görüntü yazarlar. Bu nedenle uygulamayı tam görebilmek için konsol devredışı bırakılmalıdır.
-- Uygulamaya yeni bir dosya ekliyor veya mevcut bir dosyayı siliyorsanız **CMakeLists.txt** dosyasında derlenecek dosyaları güncellemeyi unutmayın.
-- Bu uygulama Raspberry Pi 4 cihazı üzerinde test edilmiştir. Daha düşük donanımlarda test edilmemiştir.
-- Bu uygulamada bazı backend işlemleri için C kütüphaneleri kullanılmıştır. Uygulama yalnızca LVGL kütüphanesine bağımlı değildir.
+- The sample application is configured for **framebuffer-based rendering**. Therefore, a desktop environment **should not be running** on the target device.  
+  If you plan to use a desktop environment, you must switch the rendering backend to **SDL**.
+
+- In framebuffer-based applications, **console output and the GUI share the same screen**.  
+  To view the interface properly, console output should be disabled.
+
+- If you add a new source file or remove an existing one, **don’t forget to update the list of compiled files in `CMakeLists.txt`**.
+
+- This application has been tested on **Raspberry Pi 4**.  
+  It has **not** been tested on lower-end hardware.
+
+- Some backend operations use **C standard libraries**.  
+  The application is **not solely dependent** on the LVGL library.

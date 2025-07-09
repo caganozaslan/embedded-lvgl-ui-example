@@ -1,130 +1,129 @@
-# Uygulama Mimarisi
+# Application Architecture
 
-## Projenin Amacı
+## Project Purpose
 
-Bu örnek eğitim projesi, LVGL (Light and Versatile Graphics Library) kullanılarak gömülü Linux cihazlar için tam ekranlı, dokunmatik destekli bir kullanıcı arayüzü oluşturmayı amaçlamaktadır. Proje; Wi-Fi yapılandırması, sensör verilerinin izlenmesi, sistem bilgileri, stil yönetimi, ayarlar ve veri kaydı gibi bileşenleri kapsar.
+This educational sample project aims to create a full-screen, touch-enabled user interface for embedded Linux devices using LVGL (Light and Versatile Graphics Library). It covers components such as Wi-Fi configuration, sensor data monitoring, system information, style management, settings, and data logging.
 
-## Genel Sistem Yapısı
+## Overall System Structure
 
-Proje, üç ana modülden oluşur:
+The project consists of three main modules:
 
-1. **Kullanıcı Arayüzü (GUI):**
-   - LVGL ile yazılmış sayfalar
-   - `ScreenManager` üzerinden yönetilen ekran geçişleri
-   - `style.cpp` ile merkezi stil yönetimi
+1. **User Interface (GUI):**
+   - Pages written with LVGL  
+   - Screen transitions managed via `ScreenManager`  
+   - Centralized style management in `style.cpp`
 
-2. **Arka Plan Sistem İşlevleri:**
-   - Wi-Fi bağlantısı ve ağı tarama (`systemfunctions.cpp`)
-   - Sistem saati eşitleme, IP alma, shutdown işlemleri
-   - Otomatik bağlantı mekanizması ve loglama
+2. **Background System Functions:**
+   - Wi-Fi connection and network scanning (`systemfunctions.cpp`)  
+   - System-time synchronization, IP retrieval, shutdown operations  
+   - Auto-connect mechanism and logging
 
-3. **Sensör Alt Sistemi:**
-   - RS-485 üzerinden veri okuma (`serial_sensor.cpp`)
-   - Simülasyon modu desteği
-   - Anlık ve geçmiş verilerin dosyaya yazılması (`sensor_recorder.cpp`)
-   - Sensör ayarları (`sensor_settings.cpp`)
+3. **Sensor Subsystem:**
+   - Data acquisition over RS-485 (`serial_sensor.cpp`)  
+   - Simulation-mode support  
+   - Writing live and historical data to file (`sensor_recorder.cpp`)  
+   - Sensor settings (`sensor_settings.cpp`)
 
-## Dosya ve Katman Yapısı
+## File and Layer Structure
 
-| Dosya                     | Açıklama |
-|--------------------------|----------|
-| `main.cpp`               | Uygulama girişi, ilk ekran yükleme |
-| `maingui.cpp`            | İlk açılan ana sayfa ekranı |
-| `screen_manager.cpp`     | Sayfa geçişlerini yöneten singleton sınıf |
-| `style.cpp`              | LVGL stil tanımları ve merkezi renk/font kontrolü |
-| `header.cpp`             | Her sayfada üstte görünen başlık çubuğu |
-| `wifi_settings.cpp`      | Wi-Fi tarama, bağlantı, parola girişi arayüzü |
-| `sensor_settings.cpp`    | Sensör konfigürasyon sayfası (simülasyon, periyot, veri türleri) |
-| `sensor_recorder.cpp`    | Gerçek/simüle sensör verisini okuyan ve kaydeden thread |
-| `serial_sensor.cpp`      | RS-485 üzerinden veri alma işlevleri |
-| `live_data.cpp`          | Anlık sensör verilerini gösteren ekran |
-| `average_data.cpp`       | Ortalama veriler, kullanıcı tanımlı istatistik ve grafik |
-| `systeminfo.cpp`         | Cihaz hakkında bilgiler (CPU, Wi-Fi, saat, kernel vb.) |
-| `settings_screen.cpp`    | Uygulama genel ayarlarının tutulduğu merkezi sayfa |
-| `systemfunctions.cpp`    | Wi-Fi yönetimi, zaman senkronizasyonu, cihaz kapatma, loglama |
+| File                   | Description                                                   |
+|------------------------|---------------------------------------------------------------|
+| `main.cpp`             | Application entry point, loads the first screen              |
+| `maingui.cpp`          | Main home screen shown at startup                            |
+| `screen_manager.cpp`   | Singleton class that handles screen switching                |
+| `style.cpp`            | LVGL style definitions and centralized color/font control     |
+| `header.cpp`           | Header bar displayed at the top of every screen              |
+| `wifi_settings.cpp`    | UI for Wi-Fi scanning, connecting, and password entry        |
+| `sensor_settings.cpp`  | Sensor-configuration page (simulation, interval, data types) |
+| `sensor_recorder.cpp`  | Thread that reads and logs real/simulated sensor data        |
+| `serial_sensor.cpp`    | RS-485 data-acquisition functions                            |
+| `live_data.cpp`        | Screen displaying live sensor values                         |
+| `average_data.cpp`     | Average data, user-defined statistics, and charts            |
+| `systeminfo.cpp`       | Device information (CPU, Wi-Fi, time, kernel, etc.)          |
+| `settings_screen.cpp`  | Central page for application-wide settings                   |
+| `systemfunctions.cpp`  | Wi-Fi management, time sync, device shutdown, logging        |
 
-## Arayüz Mimarisi
+## Interface Architecture
 
-- Tüm sayfalar tam ekran `lv_obj_create()` ile oluşturulur.
-- `create_header()` her sayfada üst bilgi çubuğunu ekler.
-- `ScreenManager::register_screen()` ile ekranlar kayıt edilir.
-- `style.cpp` içinde her nesne tipi için önceden tanımlı stiller (`style_button`, `style_title`, vb.) vardır.
-- Simülasyon ve gerçek donanım farkı `#ifdef _WIN32` blokları ile ayrılmıştır.
+- All pages are created full-screen using `lv_obj_create()`.
+- `create_header()` adds the top header bar to each page.
+- Screens are registered via `ScreenManager::register_screen()`.
+- `style.cpp` contains predefined styles like `style_button`, `style_title`, etc.
+- Platform-specific logic is handled with `#ifdef _WIN32` blocks.
 
-## Wi-Fi Yönetimi
+## Wi-Fi Management
 
-- `wifi_settings.cpp` ekranı, mevcut ağları tarayıp listeler.
-- Kullanıcı, SSID ve parola girerek bağlanır.
-- Bilinen ağlar `/etc/known_networks.txt` içinde saklanır.
-- Bağlantı durumu `systemfunctions.cpp` içindeki `wifi_status_monitor_cb()` ile her 15 saniyede izlenir.
-- Otomatik yeniden bağlanma desteklenir.
+- `wifi_settings.cpp` scans and lists available networks.
+- Users can enter SSID and password to connect.
+- Saved networks are stored in `/etc/known_networks.txt`.
+- Connection status is checked every 15 seconds using `wifi_status_monitor_cb()` in `systemfunctions.cpp`.
+- Auto-reconnection is supported.
 
-## Sensör Sistemi
+## Sensor System
 
-- Gerçek cihazda RS-485 ile `/dev/ttyUSB0` üzerinden veri okunur.
-- Simülasyon modu Windows’ta veya test amaçlı Linux'ta kullanılabilir.
-- Veriler `/etc/sensor_data.txt` dosyasına yazılır.
-- Veri türleri: sıcaklık, iletkenlik, basınç.
-- Arka planda çalışan thread, `sensor_recorder.cpp` içinde yönetilir.
+- On real devices, data is read via RS-485 from `/dev/ttyUSB0`.
+- Simulation mode can be used on Windows or Linux for testing purposes.
+- Data is logged to `/etc/sensor_data.txt`.
+- Data types: temperature, conductivity, pressure.
+- A background thread in `sensor_recorder.cpp` handles data acquisition.
 
-## Veri Görselleştirme
+## Data Visualization
 
-### Anlık Veriler (`live_data.cpp`)
-- En son okunan değerleri büyük fontla gösterir.
-- Arka planda çalışan thread'den alınan veri görüntülenir.
+### Live Data (`live_data.cpp`)
 
-### Ortalama Veriler (`average_data.cpp`)
-- Son X veri ya da son X dakika için ortalama hesaplar.
-- Kullanıcı hangi verilerin (sıcaklık, basınç...) dahil edileceğini seçebilir.
-- LVGL chart widget kullanılarak grafik gösterimi yapılır.
+- Displays the most recent sensor values in large font.
+- Reads data from a background polling thread.
 
-## Sistem Bilgisi
+### Average Data (`average_data.cpp`)
 
-- `systeminfo.cpp`, sistemdeki temel bilgileri listeler.
-- Örnek bilgiler: cihaz modeli, CPU çekirdeği, bağlı Wi-Fi, saat, IP, kernel sürümü.
-- Linux komutları çalıştırılarak veriler alınır (`popen` + `grep/awk`).
+- Calculates averages over the last X entries or last X minutes.
+- Users can select which data (e.g., temperature, pressure) to include.
+- Uses LVGL chart widget for graphical display.
 
-## Bellek ve Güç Ayarları
+## System Information
 
-- `settings_screen.cpp` ekranında kullanıcı; Wi-Fi otomatik bağlantı, SSH erişimi, ekran zaman aşımı, gece modu gibi ayarları değiştirebilir.
-- Tüm ayarlar `/etc/settings.txt` dosyasında saklanır.
+- `systeminfo.cpp` lists essential system data:
+  - Device model, CPU cores, Wi-Fi SSID, time, IP address, kernel version
+- Data is retrieved via Linux commands using `popen` with tools like `grep` or `awk`.
 
-## Akış Diyagramı
+## Memory and Power Settings
 
-1. `main.cpp` → `ScreenManager` başlatılır → `maingui.cpp` içindeki ana ekran gösterilir
-2. Kullanıcı butonlar aracılığıyla ekranlar arasında geçiş yapar
-3. Sayfa içindeki butonlar ayarları değiştirir veya sistem fonksiyonları çağırır
-4. Arka planda:
-   - Timer ile güncellenen bilgiler (Wi-Fi durumu, sistem bilgisi)
-   - Thread ile okunan ve dosyaya yazılan sensör verileri
+- The `settings_screen.cpp` allows users to configure auto Wi-Fi, SSH access, screen timeout, night mode, and more.
+- All settings are saved to `/etc/settings.txt`.
 
-## Çoklu Görev ve Eşzamanlılık
+## Flow Diagram
 
-- Sensör veri toplama işlemi `std::thread` ile bağımsız çalışır
-- Wi-Fi bağlantısı arka planda başlatılır, tamamlandığında `on_done` fonksiyonu çağrılır
-- LVGL'de GUI işlemleri asenkron güncellenir (`lv_async_call()`)
+1. `main.cpp` → Initializes `ScreenManager` → Displays main GUI from `maingui.cpp`  
+2. User navigates between screens using buttons  
+3. UI elements modify settings or call system functions  
+4. In the background:  
+   - Periodic timers update Wi-Fi status and system info  
+   - Threads log sensor data continuously
 
-## Platform Uyumluluğu
+## Multitasking and Concurrency
 
-- `#ifdef _WIN32` kullanımıyla Windows simülasyonu desteklenir
-- Simülasyon ortamı için örnek veriler üretilir
-- Gerçek cihazda `/dev`, `ifconfig`, `wpa_supplicant` gibi Linux araçları kullanılır
+- Sensor data is acquired using a dedicated `std::thread`.
+- Wi-Fi connection is handled asynchronously, with a callback invoked on completion (`on_done`).
+- GUI updates are triggered with `lv_async_call()` to ensure safe rendering.
 
-## Dosya İletişimi
+## Platform Compatibility
 
-| Dosya Yolu              | İçerik                        |
-|-------------------------|-------------------------------|
-| `/etc/settings.txt`     | Tüm kullanıcı ayarları        |
-| `/etc/sensor_data.txt`  | Tarih/zaman damgalı sensor logu |
-| `/etc/logs.txt`         | Sistem logları ve uyarılar    |
-| `/etc/known_networks.txt` | Bilinen SSID:Şifre kayıtları  |
+- Windows simulation is supported via `#ifdef _WIN32`.
+- Simulation mode uses dummy data.
+- On real devices, Linux tools like `/dev`, `ifconfig`, and `wpa_supplicant` are used for system access.
 
-## Geliştirme Notları
+## File Communication
 
-- LVGL sürümü: 9.1.0
-- Uygulama geliştirme aşamasındadır
-- Fontlar: `lv_font_montserrat_20` ve `22`
-- Uygulama CMake ile derlenir, hem gerçek cihaz hem de simülasyon desteklenir
+| File Path                 | Contents                             |
+|---------------------------|--------------------------------------|
+| `/etc/settings.txt`       | All user settings                    |
+| `/etc/sensor_data.txt`    | Timestamped sensor data log         |
+| `/etc/logs.txt`           | System logs and warnings            |
+| `/etc/known_networks.txt` | Stored SSID:Password pairs          |
 
----
+## Development Notes
 
+- LVGL version: **9.1.0**
+- The application is still under **active development**
+- Fonts used: `lv_font_montserrat_20` and `22`
+- The project uses **CMake** and supports both real hardware and Windows simulation

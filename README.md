@@ -1,207 +1,240 @@
-# LVGL Tabanlı Gömülü Arayüz Projesi
+# LVGL-Based Embedded GUI Project
 
-Bu proje, **LVGL (Light and Versatile Graphics Library)** tabanlı olarak geliştirilmiş, gömülü Linux cihazlarda çalışmak üzere optimize edilmiş bir grafik kullanıcı arayüzü sistemidir. Arayüz yapısı; sayfa bazlı modüler mimarisi, merkezi ekran geçiş yönetimi (`ScreenManager`), stil bileşenlerinin tek merkezden kontrol edildiği yapı (`style.cpp`) ve platforma özel sistem çağrılarıyla desteklenmiş backend entegrasyonları ile birlikte gelir. Sistem; dokunmatik uyumlu kullanıcı arayüzü, gerçek zamanlı veri izleme, Wi-Fi yapılandırması, UART üzerinden sensör haberleşmesi ve sistem kontrol bileşenleri gibi temel gömülü işlevleri kapsamlı bir şekilde sunar.
+This project is a **graphical user interface (GUI) system built on LVGL (Light and Versatile Graphics Library)**, optimized for use on embedded Linux devices. The interface architecture is modular and page-based, featuring centralized screen transition management (`ScreenManager`), unified styling (`style.cpp`), and platform-specific backend integrations. It offers comprehensive features such as touch-friendly GUI, real-time data monitoring, Wi-Fi configuration, UART-based sensor communication, and system control components.
 
-Proje, **geliştirici dostu** olacak şekilde tasarlanmış; hem gerçek Linux cihazlar üzerinde doğrudan çalışacak altyapıya hem de Windows üzerinde LVGL simülatörü ile test edilebilecek platform bağımsız yapıya sahiptir. Kod yapısı; açık, okunabilir ve yeniden kullanılabilir olacak şekilde tasarlandığı için, farklı projelere temel oluşturabilecek veya kolayca özelleştirilebilecek bir iskelet sunar. Bu sayede geliştiriciler, ihtiyaç duydukları yeni ekranları, sistem işlevlerini ya da donanım bileşenlerini mevcut yapıya entegre etmekte hiçbir zorluk yaşamaz.
-
-
----
-
-## Amaç
-
-Bu projenin temel amacı, **gerçek gömülü donanımlarda** ya da **Windows ortamında simülatör üzerinden** çalışabilecek, **modüler**, **özelleştirilebilir** ve **açık kaynaklı** bir grafik kullanıcı arayüzü altyapısı sunmaktır. Sistem, gömülü uygulamalarda sık karşılaşılan birçok işlevi entegre biçimde sunarken; geliştiricilere esnek, yeniden kullanılabilir ve genişletilebilir bir temel sağlamayı hedefler.
-
-Projenin dikkat çeken başlıca özellikleri şunlardır:
-
-- **Dokunmatik uyumlu kullanıcı dostu arayüz**  
-  Modern gömülü cihazlar için optimize edilmiş, sade bir kullanıcı arayüzü tasarımı sunar. Tüm ekran bileşenleri LVGL'nin özelleştirilebilir widget'larıyla oluşturulmuştur.
-
-- **Gerçek zamanlı veri işleme ve görselleştirme**  
-  UART üzerinden okunan (veya simüle edilen) sensör verileri anlık olarak kullanıcıya sunulur; grafiklerle desteklenir. Sistem, istenirse bu verileri saklayarak geçmiş analizleri de yapılabilir hale getirir.
-
-- **Wi-Fi yapılandırma desteği**  
-  Anlık ağ taraması, şifreyle bağlanma, otomatik bağlantı, ağları kaydetme/silme gibi birçok işlevle donatılmış tam teşekküllü bir Wi-Fi yönetim arayüzü içerir.
-
-- **Cihaz ve sistem ayarlarının kontrolü**  
-  Tarih/saat yönetimi, parlaklık kontrolü, SSH erişimi, ekran zaman aşımı ve sistem log görüntüleme gibi temel sistem ayarları doğrudan arayüz üzerinden yapılandırılabilir.
-
-- **Modüler ve geliştirici dostu yapı**  
-  Her bir ekran ve bileşen bağımsız `.cpp` dosyalarında tanımlanmış, `ScreenManager` ile merkezi olarak yönetilen, stil yapılarını ayrı tutan, temiz bir mimari sunulmuştur. Bu sayede hem yeni sayfa eklemek hem de mevcut yapıyı farklı projelere uyarlamak son derece kolaydır.
+Designed to be **developer-friendly**, the system runs natively on real Linux devices and can also be tested cross-platform using the LVGL simulator on Windows. Its clean, readable, and reusable code structure allows easy customization or reuse in other projects. Developers can effortlessly add new screens, integrate hardware functions, or expand existing functionalities into the current framework.
 
 ---
 
-İhtiyaç duyulduğunda donanıma özel işlevler (örneğin GPIO, ekran parlaklığı kontrolü, sistem kapatma, loglama vs.) arka plandaki Linux sistem komutları veya dosya yapıları ile doğrudan entegre edilebilir. Bu sayede proje yalnızca bir arayüz değil, aynı zamanda **cihaz yönetim paneli** işlevi de görebilecek esnekliğe sahiptir.
+## Purpose
 
+The main goal of this project is to provide a **modular**, **customizable**, and **open-source** GUI infrastructure that runs on both **real embedded hardware** and **Windows-based simulators**. It integrates many essential embedded application features while offering developers a flexible and scalable foundation.
 
----
+Key features of the system include:
 
-## Mimarinin Temelleri
+- **Touch-optimized, user-friendly interface**  
+  A minimal and modern UI designed for embedded touchscreens, built entirely with customizable LVGL widgets.
 
-Bu projede, kullanıcı arayüzü ve sistem arka planı birbirinden ayrılmış, **temiz katmanlara sahip**, sürdürülebilir bir yapı tercih edilmiştir. Tüm bileşenler birbirinden bağımsız ama koordineli çalışacak şekilde organize edilmiştir. Bu yaklaşım, hem bakım kolaylığı sağlar hem de özelleştirme ve genişletme işlemlerini son derece pratik hale getirir.
+- **Real-time data processing and visualization**  
+  Sensor data received over UART (or simulated) is presented live to the user, optionally recorded, and visualized via charts.
 
-### 🧱 Modüler Sayfa Sistemi
+- **Comprehensive Wi-Fi configuration**  
+  A full-featured Wi-Fi manager with live scanning, password entry, auto-connect, save/remove networks, and connection status display.
 
-- Her bir kullanıcı arayüzü ekranı (örneğin: `Anlık Veriler`, `Wi-Fi Ayarları`, `Sistem Bilgisi`, vb.) ayrı `.cpp` dosyalarında tanımlanmıştır. Bu, hem okunabilirliği artırır hem de ekip içi iş bölümü için avantaj sağlar.
-- Sayfalar `main.cpp` içerisinden tek noktadan oluşturulur ve `ScreenManager` aracılığıyla kontrol edilir. Bu yapı, tüm ekran akışının merkezi şekilde izlenebilmesini ve düzenlenebilmesini mümkün kılar.
-- Geliştirici, yeni bir ekran eklemek istediğinde yalnızca ilgili `.cpp` dosyasını tanımlayıp `ScreenManager` üzerinden kaydederek projeye entegre edebilir.
+- **Device and system configuration**  
+  Includes system settings like date/time, brightness, SSH access, screen timeout, and viewing system logs directly from the UI.
 
-### 🧭 Ekran Yönetimi: `ScreenManager`
-
-- `screen_manager.cpp` dosyasında tanımlı `ScreenManager` sınıfı, ekranlar arası geçişleri merkezi olarak yöneten özel bir kontrol katmanıdır.
-- Her ekran uygulama başlangıcında `register_screen()` ile kayıt edilir. Ardından `show_screen(index)` veya `show_screen(name)` çağrılarıyla istenen ekran aktif hale getirilir.
-- Bu yapı sayesinde uygulama mimarisi:
-  - Karmaşık ekran yapılarında bile **kontrol edilebilir**,
-  - UI akışı boyunca **tutarlı**,  
-  - Genişletilmeye açık **ölçeklenebilir** bir form kazanır. Bellek yönetimi geliştirmelerine açıktır.
-
-### 🎨 Stil Sistemi: `style.cpp`
-
-- Tüm stil bileşenleri (renk paletleri, fontlar, boşluklar, kenarlıklar vb.), merkezi bir dosyada (`style.cpp`) tanımlanarak UI genelinde bütünlük sağlanır.
-- Kod tekrarını azaltır, temaya uygun tek noktadan değişiklik yapılmasına imkân verir.
-- Öne çıkan örnek stiller:
-  - `style_button` → Tüm butonlar için standart görünüm
-  - `style_title` → Sayfa başlıklarında kullanılan büyük yazı tipi ve kalınlık
-  - `style_header_bar` → Üst kısımda yer alan sabit bar (Wi-Fi, pil, saat) stili
-
-### 🔌 Backend Entegrasyonu (Gerçek Cihaz)
-
-Proje, gerçek gömülü sistemlerde çalışacak şekilde donanım seviyesinde yapılandırılmıştır. Arayüzdeki birçok işlem, arka planda **doğrudan Linux sistem çağrıları** ile entegre çalışır:
-
-- `settimeofday()` → Kullanıcının ayarladığı tarih/saat bilgisi cihaz sistem saatine aktarılır.
-- `/etc/` → Ayarlar, loglar ve kayıtlı ağlar gibi kalıcı bilgiler burada saklanır.
-- UART haberleşmesi → Sensör verileri arka planda seri port üzerinden alınır ve işlenir.
-- Sistem komutları (`reboot`, `ifconfig`, `iwlist`, `cat`, `rm` vs.) doğrudan çalıştırılarak ağ, sistem bilgisi ve log yönetimi gerçekleştirilir.
-
-Backend işlemler yalnızca gerçek cihazda aktiftir. Windows simülatör ortamı, aynı arayüzle çalışacak şekilde yapılandırılmış olsa da bu işlemler yerine sahte veriler kullanır. Böylece proje hem test hem de üretim aşamasına uygun hale gelir.
-
-
-### Platform Uyumluluğu
-
-Proje, **Yocto tabanlı özel bir Linux dağıtımı** üzerinde çalışmak üzere geliştirilmiştir. Bu nedenle, ağ yönetimi, sistem saat ayarı, UART haberleşmesi, dosya işlemleri ve log yönetimi gibi birçok işlem doğrudan temel Linux komutları ile gerçekleştirilir.
-
-Geliştirme sürecinde, kullanıcı arayüzünün tasarımı ve testleri öncelikle **LVGL Windows Simulator** üzerinde gerçekleştirilmiştir. Bu yaklaşım sayesinde, gerçek donanıma ihtiyaç duymadan kullanıcı arayüzü bileşenleri hızlı ve platformdan bağımsız olarak test edilebilmiştir.
-
-Projede platform farkları dikkate alınarak geliştirilen özel yapı sayesinde:
-
-- **Gerçek Linux cihazlarda** tam fonksiyonel backend işlemleri (dosya okuma/yazma, Wi-Fi bağlantı yönetimi, UART üzerinden veri alma, sistem saatini değiştirme vb.) aktif hale gelir.
-- **Windows simülasyon ortamında** ise aynı arayüz yapısı korunur, ancak tüm sistemsel işlemler dummy (örnek) veriler ile taklit edilir. Böylece geliştirme süreci cihazdan bağımsız ilerletilebilir.
-
-Bu yapı, projeyi hem gömülü sistemlerde kullanılabilir bir ürün haline getirir, hem de platformdan bağımsız olarak sürdürülebilir bir geliştirme deneyimi sunar.
+- **Modular and developer-oriented architecture**  
+  Each screen and component is implemented in its own `.cpp` file, centrally managed through `ScreenManager`, and styled through a single `style.cpp`. This allows easy adaptation or extension for other projects.
 
 ---
 
-## Ana Sayfa ve Sayfalar
-
-Ana ekranda 6 adet buton (sayfa) yer alır:
-
-1. Anlık Veriler
-2. Wi-Fi Ayarları
-3. Ortalama Veriler
-4. Sensör Ayarları
-5. Sistem Bilgisi
-6. Cihaz Ayarları
-
-Ek olarak "Cihazı Kapat" butonu bulunur.
-
-Her sayfada ortak bir **header bar** yer alır:
-
-- Wi-Fi bağlantı durumu ikonu
-- Sabit pil ikonu
-- Gerçek zamanlı güncellenen cihaz saati
+When needed, hardware-specific functions (e.g., GPIO control, screen brightness, shutdown, logging) can be directly integrated via Linux system commands or file-based access. This makes the project not just a UI, but also a **device management panel**.
 
 ---
 
-## Sayfa Detayları
+## Architecture Overview
 
-### Wi-Fi Ayarları
+This project follows a **clean, layered architecture**, separating the user interface from system logic. All components are organized to work independently yet harmoniously, ensuring easy maintenance and future extensibility.
 
-- Mevcut ağlar taranarak listelenir
-- Şifre girilerek bağlantı denenebilir
-- Başarılı bağlantılar `/etc/` altında kaydedilir
-- Bağlantıyı kesme ve durumu canlı gösterme özelliği vardır
+### Modular Page System
 
-### Sistem Bilgisi
+- Each UI screen (e.g., `Live Data`, `Wi-Fi Settings`, `System Info`, etc.) is defined in a separate `.cpp` file for better readability and parallel development.
+- Pages are instantiated in `main.cpp` and managed via the central `ScreenManager`.
+- Developers can add new screens by defining a new `.cpp` file and registering it in `ScreenManager`.
 
-- Linux sistem komutlarıyla elde edilen bilgiler 15 saniyede bir güncellenir:
-  - Cihaz adı, CPU, IP, SSID, Tarih/Saat, Kernel versiyonu, Uygulama versiyonu
+### Screen Management: `ScreenManager`
 
-### Sensör Ayarları
+- Implemented in `screen_manager.cpp`, the `ScreenManager` class handles all screen transitions centrally.
+- Each screen is registered at startup using `register_screen()`, and activated using `show_screen(index)` or `show_screen(name)`.
+- This enables:
+  - **Maintainable** screen flows,
+  - **Consistent** UI navigation,
+  - **Scalable** architecture open to memory optimization.
 
-- Simülasyon modu (ON/OFF)
-- UART üzerinden veri okuma
-- Okuma periyodu (saniye)
-- Gösterilecek veriler: sıcaklık, iletkenlik, basınç
-- "Başlat", "Durdur", "Kaydet" butonları
-- Ayarlar dosyaya kaydedilir
+### Centralized Styling: `style.cpp`
 
-### Ortalama Veriler
+- All styling components (colors, fonts, spacing, borders, etc.) are defined in one place for consistency and maintainability.
+- Reduces code duplication and enables easy global theme changes.
+- Key examples:
+  - `style_button` → Standard button appearance
+  - `style_title` → Large bold text for page titles
+  - `style_header_bar` → Fixed top bar for Wi-Fi, battery, clock
 
-- Son X veri veya son X dakika seçilerek analiz yapılır
-- Grafik tipi seçimi: çizgi, bar, scatter
-- Hangi parametreler grafikte gösterileceği belirlenebilir
+### Backend Integration (Real Device)
 
-### Cihaz Ayarları
+The project is designed to run natively on embedded Linux systems, integrating many backend operations using **direct system calls**:
 
-3 sekmeye ayrılmıştır:
+- `settimeofday()` → Updates device system time from UI
+- `/etc/` → Stores persistent data like settings, logs, and saved networks
+- UART → Continuously reads and parses sensor data in the background
+- Native commands (`reboot`, `ifconfig`, `iwlist`, `cat`, `rm`, etc.) handle system info, networking, and logging
 
-#### Ağ/Sunucu
-- Wi-Fi otomatik bağlan aç/kapa (yalnızca buton)
-- Ağ kayıtlarını unut
-- SSH erişimi aç/kapat (yalnızca buton)
-- Sunucuyla veri paylaşımı (yalnızca buton)
-
-#### Sistem
-- Tarih/Saat ayarı
-- Verileri eşitleme butonu (NTP olan sistemlerde backend yazılabilir.)
-- Güncellemeleri kontrol et (sabit "güncel" mesajı)
-- Fabrika ayarlarına dön (yalnızca buton)
-- Log görüntüleme ve temizleme
-- Ekran zaman aşımı (yalnızca buton)
-
-#### Arayüz
-- Parlaklık ayarı (slider) (yalnızca buton)
-- Bellek tasarruf modu (ON/OFF) (yalnızca buton)
-- Düşük güç tüketimi modu (ON/OFF) (yalnızca buton)
+These backend processes are **only active on real devices**. The Windows simulator uses dummy data to mimic the same behavior, ensuring consistent testing even without hardware.
 
 ---
 
-## Arka Plan Servisleri
+## Platform Compatibility
 
-- **Wi-Fi Otomatik Bağlantı**  
-  `/etc/` içindeki kayıtlı ağlarla anlık tarananlar kıyaslanır ve eşleşen ağa otomatik bağlanma denenir. Bağlantı başarısızsa ağ silinir.
+The project is developed for a **custom Yocto-based Linux distribution**. Therefore, most backend operations rely on standard Linux commands and file structures.
 
-- **Sensör Kayıtları**  
-  Sensör verileri zaman damgası ile kaydedilir. Ortalama Veriler sayfasından kullanıcı gerekli ortalama alma işlemlerini yapabilir veya verileri grafik olarak okuyabilir.
+During development, the GUI was initially tested using the **LVGL Windows Simulator**, allowing rapid, hardware-independent interface prototyping.
 
-- **Loglama**  
-  Belirli işlemler `/etc/logs.txt` dosyasına kaydedilir. Kullanıcı bu logları okuyabilir veya silebilir.
+Thanks to platform-aware conditional code:
+
+- On **real Linux devices**, all backend tasks (file operations, Wi-Fi connection, UART, time sync, etc.) are fully functional.
+- In **Windows simulator**, the same GUI runs, but all system functions are simulated using placeholder data.
+
+This dual-mode setup makes the project both hardware-ready and development-friendly.
 
 ---
 
-## Proje Dizin Yapısı
+## Home Screen and Navigation
+
+The main menu features six interactive buttons (screens):
+
+1. Live Data  
+2. Wi-Fi Settings  
+3. Average Data  
+4. Sensor Settings  
+5. System Info  
+6. Device Settings  
+
+Additionally, a **"Shutdown Device"** button is included.
+
+All screens share a common **header bar** displaying:
+
+- Wi-Fi connection status
+- Static battery icon
+- Real-time device clock
+
+---
+
+## Page Details
+
+### Wi-Fi Settings
+
+- Scans and lists available networks
+- Allows password entry and connection attempts
+- Successful connections are stored in `/etc/`
+- Can disconnect and monitor connection status live
+
+### System Info
+
+- Updates every 15 seconds using Linux system commands:
+  - Device name, CPU, IP, SSID, Date/Time, Kernel version, App version
+
+### Sensor Settings
+
+- Simulation mode ON/OFF
+- Reads sensor data over UART
+- Reading interval (seconds)
+- Selectable values to display: temperature, conductivity, pressure
+- Start / Stop / Save buttons
+- Settings saved to file
+
+### Average Data
+
+- Averages calculated based on:
+  - Last X entries
+  - Last X minutes
+- Chart types: Line, Bar, Scatter
+- User selects which parameters to visualize
+
+### Device Settings
+
+Organized into 3 tabs:
+
+#### Network / Server
+
+- Toggle auto Wi-Fi connection
+- Forget saved networks
+- Toggle SSH access
+- Toggle data sharing with server
+
+#### System
+
+- Date and time settings
+- Sync button (NTP-based backend can be added)
+- Check for updates (currently always "up to date")
+- Factory reset
+- View or clear logs
+- Screen timeout setting
+
+#### Interface
+
+- Brightness adjustment (slider)
+- Toggle memory saving mode
+- Toggle low power mode
+
+---
+
+## Background Services
+
+- **Auto Wi-Fi Reconnect**  
+  Compares `/etc/` saved networks with scanned ones and reconnects automatically. Deletes network if connection fails.
+
+- **Sensor Data Logging**  
+  Sensor readings are timestamped and stored. The Average Data screen can later access them for analysis and visualization.
+
+- **System Logging**  
+  Key operations are logged to `/etc/logs.txt`. Users can read or clear them from the UI.
+
+---
+
+## Project Directory Structure
 
 ```plaintext
-project_root/
-├── src/                    # Tüm kaynak kodlar (.cpp/.h + CMakeLists)
+embedded-lvgl-ui-example/
+├── README.md                  # Main project documentation (English)
+├── README_TR.md               # Main project documentation (Turkish)
+├── src/                       # Source code for both language versions
+│   ├── EN/                    # English version of the UI application
+│   └── TR/                    # Turkish version of the UI application
 ├── docs/
-│   ├── README.md           # Proje açıklaması (bu dosya)
-│   ├── todo.md             # Bilinen eksikler / planlananlar
-│   └── screenshots/        # Ekran görüntüleri (opsiyonel)
-└── lvgl/                   # LVGL kaynak kodları (submodule olabilir)
+│   ├── EN/                    # English documentation
+│   │   ├── architecture.md
+│   │   ├── usage.md
+│   │   └── todo.md
+│   ├── TR/                    # Turkish documentation
+│   │   ├── architecture_TR.md
+│   │   ├── usage_TR.md
+│   │   └── todo_TR.md
+│   └── screenshots/           # UI screenshots for documentation             # LVGL source (can be submodule)
 ```
 
-## Notlar
+### Description of Key Folders and Files
 
-- Bu proje halen **aktif geliştirme sürecindedir**. Arayüz bileşenleri büyük ölçüde tamamlanmış olsa da; bazı sistem işlevleri (örneğin: parlaklık kontrolü, SSH erişimi, güç tasarrufu modları) yalnızca arayüz düzeyinde yer almakta, backend tarafında henüz işlevsel değildir.
-  
-- Proje, hem **öğrenme amaçlı geliştiriciler** hem de **profesyonel gömülü sistem projeleri** için temel oluşturabilecek, **modüler ve genişletilebilir** bir mimariye sahiptir.
+- **README.md / README_TR.md**  
+  Entry point documentation files for the project in English and Turkish.
 
-- Backend işlemler yalnızca gerçek Linux cihazlarda çalışacak şekilde yapılandırılmıştır. Windows ortamındaki LVGL simülatörü yalnızca kullanıcı arayüzü testleri için kullanılmakta, sistemsel fonksiyonlar yerine sahte (dummy) verilerle çalışmaktadır.
+- **src/EN/** and **src/TR/**  
+  Separate implementations of the GUI application for English and Turkish. Each includes its own source files (`.cpp`, `.h`, `CMakeLists.txt`, etc.) and localized content.
 
-- Kod yapısı, geliştiricilerin:
-  - Yeni ekranlar veya ayar bölümleri eklemesine,
-  - Mevcut modülleri başka projelere aktarmasına,
-  - Platforma özel sistem çağrılarını entegre etmesine  
-  olanak sağlayacak şekilde açık, sade ve ölçeklenebilir biçimde tasarlanmıştır.
+- **docs/EN/**  
+  English-language technical documentation:
+  - `architecture.md`: High-level project structure and architecture  
+  - `usage.md`: Setup and usage guide  
+  - `todo.md`: Known issues and future plans
 
-- Bilinen eksikler, yapılacaklar listesi ve önerilen geliştirmeler [todo.md](docs/todo.md) dosyasında yer almaktadır. Bu dosya, projeye katkı sağlamak isteyen geliştiriciler için bir rehber niteliğindedir.
+- **docs/TR/**  
+  Turkish translations of all documents found in `docs/EN/`.
+
+- **docs/screenshots/**  
+  Visual examples and UI captures used in documentation.
+
+
+## Notes
+
+- This project is still **under active development**. While most UI components are functional, some system features (e.g., brightness control, SSH toggle, power-saving modes) are currently UI-only and do not yet have working backend implementations.
+
+- The architecture is designed to be **scalable and modular**, making it suitable for both **educational use** and **professional embedded GUI development**.
+
+- Backend functionality is **only active on real Linux devices**. The Windows simulator is used solely for testing the GUI and utilizes **dummy data** in place of real system functions.
+
+- The codebase is structured to allow developers to:
+  - Easily add new screens or configuration sections,
+  - Reuse existing modules in other projects,
+  - Integrate platform-specific system calls with minimal effort.
+
+- Known limitations, planned features, and suggestions for improvement are listed in the [todo.md](docs/todo.md) file, which serves as a roadmap and guide for contributors.
