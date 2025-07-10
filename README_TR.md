@@ -92,6 +92,8 @@ Bu yapı, projeyi hem gömülü sistemlerde kullanılabilir bir ürün haline ge
 
 ## Ana Sayfa ve Sayfalar
 
+![Main Page](docs/screenshots/main-page.png)
+
 Ana ekranda 6 adet buton (sayfa) yer alır:
 
 1. Anlık Veriler
@@ -115,6 +117,8 @@ Her sayfada ortak bir **header bar** yer alır:
 
 ### Wi-Fi Ayarları
 
+![Wi-Fi Settings](docs/screenshots/wifi-page.png)
+
 - Mevcut ağlar taranarak listelenir
 - Şifre girilerek bağlantı denenebilir
 - Başarılı bağlantılar `/etc/` altında kaydedilir
@@ -122,10 +126,14 @@ Her sayfada ortak bir **header bar** yer alır:
 
 ### Sistem Bilgisi
 
+![System Info](docs/screenshots/system-info-page.png)
+
 - Linux sistem komutlarıyla elde edilen bilgiler 15 saniyede bir güncellenir:
   - Cihaz adı, CPU, IP, SSID, Tarih/Saat, Kernel versiyonu, Uygulama versiyonu
 
 ### Sensör Ayarları
+
+![Sensor Settings](docs/screenshots/sensor-settings-page.png)
 
 - Simülasyon modu (ON/OFF)
 - UART üzerinden veri okuma
@@ -136,13 +144,36 @@ Her sayfada ortak bir **header bar** yer alır:
 
 ### Ortalama Veriler
 
+![Average Data](docs/screenshots/average-data-page.png)
+
 - Son X veri veya son X dakika seçilerek analiz yapılır
 - Grafik tipi seçimi: çizgi, bar, scatter
 - Hangi parametreler grafikte gösterileceği belirlenebilir
 
+### Anlık Veriler
+
+![Anlık Veriler](docs/screenshots/live-data.png)
+
+- Gerçek zamanlı sensör değerlerini gösterir:
+  - Sıcaklık  
+  - İletkenlik  
+  - Basınç  
+- Her değer, stilize edilmiş dairesel widget'lar içinde gösterilir.
+- Veriler arka planda çalışan bir zamanlayıcı ile her saniye güncellenir.
+- Sensör verisi okunamıyorsa (tüm değerler sıfırsa), hata simgesi görünür ve durum mesajı değişir.
+- Daire kenarlarında yeşil/kırmızı yanıp sönme animasyonu ile sensör durumu belirtilir.
+- Alt kısımda yer alan debug etiketleri (T:, C:, P:) ham float değerlerini gösterir.
+
 ### Cihaz Ayarları
 
 3 sekmeye ayrılmıştır:
+
+![Device Settings - Tab 1](docs/screenshots/device-settings-tab-1.png)
+
+--- 
+
+![Device Settings - Tab 2](docs/screenshots/device-settings-tab-2.png)
+
 
 #### Ağ/Sunucu
 - Wi-Fi otomatik bağlan aç/kapa (yalnızca buton)

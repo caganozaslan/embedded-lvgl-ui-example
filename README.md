@@ -91,6 +91,8 @@ This dual-mode setup makes the project both hardware-ready and development-frien
 
 ## Home Screen and Navigation
 
+![Main Page](docs/screenshots/main-page.png)
+
 The main menu features six interactive buttons (screens):
 
 1. Live Data  
@@ -114,6 +116,8 @@ All screens share a common **header bar** displaying:
 
 ### Wi-Fi Settings
 
+![Wi-Fi Settings](docs/screenshots/wifi-page.png)
+
 - Scans and lists available networks
 - Allows password entry and connection attempts
 - Successful connections are stored in `/etc/`
@@ -121,10 +125,14 @@ All screens share a common **header bar** displaying:
 
 ### System Info
 
+![System Info](docs/screenshots/system-info-page.png)
+
 - Updates every 15 seconds using Linux system commands:
   - Device name, CPU, IP, SSID, Date/Time, Kernel version, App version
 
 ### Sensor Settings
+
+![Sensor Settings](docs/screenshots/sensor-settings-page.png)
 
 - Simulation mode ON/OFF
 - Reads sensor data over UART
@@ -135,15 +143,40 @@ All screens share a common **header bar** displaying:
 
 ### Average Data
 
+![Average Data](docs/screenshots/average-data-page.png)
+
 - Averages calculated based on:
   - Last X entries
   - Last X minutes
 - Chart types: Line, Bar, Scatter
 - User selects which parameters to visualize
 
+
+### Live Data
+
+![Live Data](docs/screenshots/live-data.png)
+
+- Displays real-time sensor values:
+  - Temperature
+  - Conductivity
+  - Pressure
+- Each value is shown inside a styled circular widget.
+- The data is updated every second via a background timer.
+- If no sensor data is available (all values are zero), an error icon is shown and status message changes.
+- Colored border animations (green/red) indicate sensor status.
+- Debug labels at the bottom show raw float values with prefixes (T:, C:, P:).
+
+
+
 ### Device Settings
 
 Organized into 3 tabs:
+
+![Device Settings - Tab 1](docs/screenshots/device-settings-tab-1.png)
+
+--- 
+
+![Device Settings - Tab 2](docs/screenshots/device-settings-tab-2.png)
 
 #### Network / Server
 
