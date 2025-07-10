@@ -233,7 +233,7 @@ embedded-lvgl-ui-example/
 │   │   ├── architecture_TR.md
 │   │   ├── usage_TR.md
 │   │   └── todo_TR.md
-│   └── screenshots/           # UI screenshots for documentation             # LVGL source (can be submodule)
+│   └── screenshots/           # UI screenshots for documentation             
 ```
 
 ### Description of Key Folders and Files
